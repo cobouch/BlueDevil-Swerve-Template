@@ -6,8 +6,10 @@ import java.util.Date
 
 repositories { gradlePluginPortal() }
 
-val systemProps = System.getProperties()!!
+group = "org.salemrobotics"
+version = "0.1.0"
 
+val systemProps = System.getProperties()!!
 systemProps.setProperty("org.gradle.internal.native.headers.unresolved.dependencies.ignore", "true")
 
 // Add the Gradle plugins we will use.

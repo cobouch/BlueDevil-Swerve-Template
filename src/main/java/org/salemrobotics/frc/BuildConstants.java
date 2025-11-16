@@ -18,15 +18,15 @@ package org.salemrobotics.frc;
 /** Automatically generated file containing build version information. */
 public final class BuildConstants {
   public static final String MAVEN_GROUP = "";
-  public static final String MAVEN_NAME = "improved-drivetrain";
+  public static final String MAVEN_NAME = "BlueDevil-Swerve-Template";
   public static final String VERSION = "unspecified";
-  public static final int GIT_REVISION = -1;
-  public static final String GIT_SHA = "UNKNOWN";
-  public static final String GIT_DATE = "UNKNOWN";
-  public static final String GIT_BRANCH = "UNKNOWN";
-  public static final String BUILD_DATE = "2025-11-16 14:31:09 EST";
-  public static final long BUILD_UNIX_TIME = 1763321469752L;
-  public static final int DIRTY = 129;
+  public static final int GIT_REVISION = 2;
+  public static final String GIT_SHA = "dc901ecc6a8694b6b08994bf5795b217e1e1da9d";
+  public static final String GIT_DATE = "2025-11-16 15:15:26 EST";
+  public static final String GIT_BRANCH = "main";
+  public static final String BUILD_DATE = "2025-11-16 15:17:01 EST";
+  public static final long BUILD_UNIX_TIME = 1763324221527L;
+  public static final int DIRTY = 0;
 
   private BuildConstants() {}
 }

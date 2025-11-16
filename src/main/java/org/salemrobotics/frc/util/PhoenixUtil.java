@@ -82,9 +82,9 @@ public class PhoenixUtil {
       }
     }
 
-    DriverStation.reportError("Error running phoenix command: " + error, false);
     // Report the error with the provided message
     DriverStation.reportError(errMessage, true);
+    DriverStation.reportError("Phoenix command failed with error: " + error, false);
     return false;
   }
 

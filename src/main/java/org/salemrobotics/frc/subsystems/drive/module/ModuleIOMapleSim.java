@@ -33,7 +33,7 @@ import org.salemrobotics.frc.subsystems.drive.DrivetrainConstants;
 public final class ModuleIOMapleSim implements ModuleIO {
   private static final double DRIVE_KP = 0.12;
   private static final double DRIVE_KD = 0;
-  private static final double STEER_KP = 2;
+  private static final double STEER_KP = 8;
   private static final double STEER_KD = 0;
 
   private final SwerveModuleSimulation simulation;
@@ -108,7 +108,7 @@ public final class ModuleIOMapleSim implements ModuleIO {
     val motorModel = simulation.getDriveMotorConfigs().motor;
     double desiredSpeed = desiredMotorVelocity.in(RadiansPerSecond);
 
-    if (!Double.isFinite(desiredSpeed) || Math.abs(desiredSpeed) < 1e-6) {
+    if (!Double.isFinite(desiredSpeed) || desiredSpeed == 0) {
       driveAppliedVolts = Volts.zero();
       return;
     }

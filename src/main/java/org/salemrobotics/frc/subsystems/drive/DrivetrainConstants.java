@@ -40,10 +40,10 @@ public final class DrivetrainConstants {
   public static final Vector<N3> AK_ODOMETRY_STDDEVS = VecBuilder.fill(0.08, 0.08, 0.08);
   public static final Vector<N3> CTRE_ODOMETRY_STDDEVS = VecBuilder.fill(0.04, 0.04, 0.04);
 
-  public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1)
-    .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio);
-  public static final DCMotor STEER_MOTOR = DCMotor.getKrakenX60Foc(1)
-    .withReduction(TunerConstants.FrontLeft.SteerMotorGearRatio);
+  public static final DCMotor DRIVE_MOTOR =
+      DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio);
+  public static final DCMotor STEER_MOTOR =
+      DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.SteerMotorGearRatio);
 
   public static final Mass ROBOT_MASS = Pounds.of(140);
   public static final double WHEEL_COF = 1.43;
@@ -55,11 +55,8 @@ public final class DrivetrainConstants {
     new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
     new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
   };
-  public static final String[] MODULE_NAMES = {
-    "Front Left", "Front Right", "Back Left", "Back Right"
-  };
 
-  public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
+    public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
   public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
   public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(4.73);
 
@@ -96,15 +93,14 @@ public final class DrivetrainConstants {
           .withRobotMass(ROBOT_MASS)
           .withBumperSize(Inches.of(30), Inches.of(30))
           .withGyro(COTS.ofPigeon2())
-          .withSwerveModule(COTS.ofMark4i(
-              DCMotor.getKrakenX60Foc(1),
-              DCMotor.getKrakenX60Foc(1), 
-              WHEEL_COF, 
-              2))
+          .withSwerveModule(
+              COTS.ofMark4i(DCMotor.getKrakenX60Foc(1), DCMotor.getKrakenX60Foc(1), WHEEL_COF, 2))
           .withCustomModuleTranslations(MODULE_TRANSLATIONS);
 
-  public static @NotNull Voltage calculateFFVoltage(@NotNull Torque torque, @NotNull AngularVelocity driveVelocity) {
-    return Volts.of(DRIVE_MOTOR.getVoltage(torque.in(NewtonMeters), driveVelocity.in(RadiansPerSecond)));
+  public static @NotNull Voltage calculateFFVoltage(
+      @NotNull Torque torque, @NotNull AngularVelocity driveVelocity) {
+    return Volts.of(
+        DRIVE_MOTOR.getVoltage(torque.in(NewtonMeters), driveVelocity.in(RadiansPerSecond)));
   }
 
   public static @NotNull Current calculateFFCurrent(@NotNull Torque torque) {
