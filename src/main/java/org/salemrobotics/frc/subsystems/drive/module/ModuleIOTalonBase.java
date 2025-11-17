@@ -27,6 +27,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.traits.CommonTalon;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
@@ -39,8 +40,17 @@ import org.salemrobotics.frc.subsystems.drive.odometry.AKOdometryThread;
 
 public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentDevice>
     implements ModuleIO {
+    /**
+     * The drive motor's motor controller.
+     */
   protected final M driveTalon;
+    /**
+     * The steer motor's motor controller.
+     */
   protected final M steerTalon;
+    /**
+     * The azimuth encoder.
+     */
   protected final E encoder;
 
   protected final StatusSignal<Angle> drivePosition;
@@ -51,7 +61,7 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
   private final StatusSignal<Current> driveTorqueCurrent;
 
   protected final StatusSignal<Angle> steerPosition;
-  private final StatusSignal<AngularVelocity> steerVelocity;
+    protected final StatusSignal<AngularVelocity> steerVelocity;
   private final StatusSignal<Voltage> steerAppliedVolts;
   private final StatusSignal<Current> steerStatorCurrent;
   private final StatusSignal<Current> steerTorqueCurrent;
@@ -72,8 +82,17 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
   private final Debouncer steerConnected = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
   private final Debouncer encoderConnected = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
 
+    /**
+     * Creates a new generic implementation of a swerve module using CTRE hardware
+     *
+     * @param addToAKThread Whether to add this module to the {@link AKOdometryThread}. Should only be used in conjunction with {@link org.salemrobotics.frc.subsystems.drive.odometry.OdometryIOAK OdometryIOAK}.
+     * @param driveMotor    The module's drive motor.
+     * @param steerMotor    The module's steer motor.
+     * @param encoder       The module's azimuth encoder.
+     * @param encoderSource The source of the encoder. This is used to differentiate the different types of CANdi inputs, such as PWM1, PWM2 and Quadrature. This does not configure the steer motor to use the provided encoder as a feedback source.
+     */
   protected ModuleIOTalonBase(
-      boolean addToAKThread, @NotNull M driveMotor, @NotNull M steerMotor, @NotNull E encoder) {
+          boolean addToAKThread, @NotNull M driveMotor, @NotNull M steerMotor, @NotNull E encoder, @NotNull FeedbackSensorSourceValue encoderSource) {
     driveTalon = driveMotor;
     steerTalon = steerMotor;
     this.encoder = encoder;
@@ -91,15 +110,52 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
     steerStatorCurrent = steerTalon.getStatorCurrent();
     steerTorqueCurrent = steerTalon.getTorqueCurrent();
 
-    if (encoder instanceof CANcoder cancoder) {
-      steerAbsolutePosition = cancoder.getAbsolutePosition();
-      steerAbsoluteVelocity = cancoder.getVelocity();
-    } else if (encoder instanceof CANdi candi) {
-      steerAbsolutePosition = candi.getPWM1Position();
-      steerAbsoluteVelocity = candi.getPWM1Velocity();
-    } else {
-      throw new RuntimeException(
-          "Encoder type is not a CANcoder or CANdi! You must manually add support for this.");
+      switch (encoderSource) {
+          case RotorSensor:
+              steerAbsolutePosition = steerMotor.getPosition();
+              steerAbsoluteVelocity = steerMotor.getVelocity();
+              break;
+          case RemoteCANcoder:
+          case FusedCANcoder:
+          case SyncCANcoder:
+              if (encoder instanceof CANcoder cancoder) {
+                  steerAbsolutePosition = cancoder.getAbsolutePosition();
+                  steerAbsoluteVelocity = cancoder.getVelocity();
+              } else {
+                  throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANcoder, found " + encoder.getClass().getSimpleName());
+              }
+              break;
+          case RemoteCANdiPWM1:
+          case FusedCANdiPWM1:
+          case SyncCANdiPWM1:
+              if (encoder instanceof CANdi candi) {
+                  steerAbsolutePosition = candi.getPWM1Position();
+                  steerAbsoluteVelocity = candi.getPWM1Velocity();
+              } else {
+                  throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANdi, found " + encoder.getClass().getSimpleName());
+              }
+              break;
+          case RemoteCANdiPWM2:
+          case FusedCANdiPWM2:
+          case SyncCANdiPWM2:
+              if (encoder instanceof CANdi candi) {
+                  steerAbsolutePosition = candi.getPWM2Position();
+                  steerAbsoluteVelocity = candi.getPWM2Velocity();
+              } else {
+                  throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANdi, found " + encoder.getClass().getSimpleName());
+              }
+              break;
+          case RemoteCANdiQuadrature:
+          case FusedCANdiQuadrature:
+              if (encoder instanceof CANdi candi) {
+                  steerAbsolutePosition = candi.getQuadraturePosition();
+                  steerAbsoluteVelocity = candi.getQuadratureVelocity();
+              } else {
+                  throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANdi, found " + encoder.getClass().getSimpleName());
+              }
+              break;
+          default:
+              throw new RuntimeException("Type of encoder '" + encoderSource + "' is not supported by the default ModuleIOTalonBase implementation. You must manually add it yourself.");
     }
 
     if (addToAKThread) {

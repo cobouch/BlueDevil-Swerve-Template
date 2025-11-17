@@ -82,8 +82,9 @@ public class ModuleIOTalonFX extends ModuleIOTalonBase<TalonFX, CANcoder> {
         true,
         new TalonFX(constants.DriveMotorId, TunerConstants.kCANBus),
         new TalonFX(constants.SteerMotorId, TunerConstants.kCANBus),
-        new CANcoder(constants.EncoderId, TunerConstants.kCANBus));
-    
+            new CANcoder(constants.EncoderId, TunerConstants.kCANBus),
+            constants.FeedbackSource);
+
     int currentModuleNumber = moduleNumber++;
 
     this.driveOutputType = constants.DriveMotorClosedLoopOutput;

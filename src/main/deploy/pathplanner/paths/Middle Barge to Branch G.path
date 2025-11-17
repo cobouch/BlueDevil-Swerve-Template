@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.259771979231413,
-        "y": 3.9131504548063134
+        "x": 6.9265539304712025,
+        "y": 3.9971692519739066
       },
       "isLocked": false,
       "linkedName": "Middle Barge"
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 5.7,
-        "y": 3.85
+        "y": 3.86
       },
       "prevControl": {
-        "x": 6.529700548979788,
-        "y": 3.9404768200134255
+        "x": 5.9484194990942845,
+        "y": 3.8880669283988296
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Starting Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

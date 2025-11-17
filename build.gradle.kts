@@ -47,6 +47,7 @@ repositories {
     url = frcHomeMaven.toURI()
   }
 
+    maven(uri("https://frcmaven.wpi.edu/artifactory/release/"))
   wpi.vendor.vendorRepos.forEach { maven(it.url) }
 }
 
@@ -56,7 +57,7 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
 
 // Define where the main class is
-val ROBOT_MAIN_CLASS = "org.salemrobotics.frc.Main"
+val robotMainClass = "org.salemrobotics.frc.Main"
 
 // Define the targets to build for (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils
@@ -172,7 +173,7 @@ tasks.jar {
   from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
   from(sourceSets["main"].allSource)
 
-  manifest(GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS))
+  manifest(GradleRIOPlugin.javaManifest(robotMainClass))
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 

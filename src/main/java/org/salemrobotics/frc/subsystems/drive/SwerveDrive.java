@@ -120,7 +120,7 @@ public class SwerveDrive extends SubsystemBase {
         this::getPose,
         this::setPoseIfSim,
         this::getChassisSpeeds,
-        this::runVelocityWithFeedforward,
+        this::runRobotRelativeWithFeedforwards,
         new PPHolonomicDriveController(AUTO_TRANSLATION_CONSTANTS, AUTO_ROTATION_CONSTANTS),
         PATH_PLANNER_CONFIG,
         AllianceFlipUtil::shouldFlip,
@@ -254,7 +254,11 @@ public class SwerveDrive extends SubsystemBase {
     }
   }
 
-  public void runVelocity(ChassisSpeeds speeds) {
+    /**
+     * Commands the drivetrain to drive at a specific speed relative to its current position.
+     * @param speeds The speeds to achieve.
+     */
+  public void runRobotRelative(ChassisSpeeds speeds) {
     Voltage batteryVoltage;
     if (RobotBase.isSimulation()) {
       batteryVoltage = SimulatedBattery.getBatteryVoltage();
@@ -285,31 +289,50 @@ public class SwerveDrive extends SubsystemBase {
     Logger.recordOutput("SwerveStates/Optimized", states);
   }
 
-  public void runVelocityWithFeedforward(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+    /**
+     * Commands the drivetrain to drive at a specified speed relative to its current position while overriding the calculated feedforwards.
+     * @param speeds        The speeds to achieve.
+     * @param feedforwards  Feedforwards to send to each swerve module.
+     */
+  public void runRobotRelativeWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
     previousSetpoint =
         new SwerveSetpoint(
             previousSetpoint.robotRelativeSpeeds(), previousSetpoint.moduleStates(), feedforwards);
 
-    runVelocity(speeds);
+    runRobotRelative(speeds);
   }
 
+    /**
+     * Commands the drivetrain to drive at a specific speed relative to the field's origin.
+     * @param speeds The speeds to achieve.
+     */
   public void runFieldCentric(ChassisSpeeds speeds) {
-    runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation()));
+    runRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation()));
   }
 
+    /**
+     * Commands the drivetrain to drive at a specific speed relative to the alliance's origin.
+     * @param speeds The speeds to achieve.
+     */
   public void runAllianceCentric(ChassisSpeeds speeds) {
     var rotation = getRotation();
     if (AllianceFlipUtil.shouldFlip()) {
       rotation = rotation.plus(Rotation2d.k180deg);
     }
 
-    runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, rotation));
+    runRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, rotation));
   }
 
+    /**
+     * Stops the drivetrain.
+     */
   public void stop() {
     forEachModule(Module::stop);
   }
 
+    /**
+     * Stops the drivetrain, making an X with the wheels for better grip.
+     */
   public void stopWithX() {
     val headings = new Rotation2d[4];
     for (int i = 0; i < 4; i++) {
@@ -330,12 +353,20 @@ public class SwerveDrive extends SubsystemBase {
                 Newtons.zero()));
   }
 
+    /**
+     * Runs the given command for each module.
+     * @param action The action to run for each module.
+     */
   public void forEachModule(ModuleConsumer action) {
     for (int i = 0; i < 4; i++) {
       action.accept(i, modules[i]);
     }
   }
 
+    /**
+     * Runs the given command for each module.
+     * @param action The action to run for each module.
+     */
   public void forEachModule(Consumer<Module> action) {
     for (int i = 0; i < 4; i++) {
       action.accept(modules[i]);

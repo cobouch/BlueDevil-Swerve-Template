@@ -27,9 +27,12 @@ public final class Constants {
   public static final CANBus CANIVORE = new CANBus("canivore0");
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+    /**
+     * Enables certain software that makes development of robot code easier.
+     */
   public static final boolean DEVBOT = true;
 
-  public static enum Mode {
+  public enum Mode {
     /** Running on a real robot. */
     REAL,
 

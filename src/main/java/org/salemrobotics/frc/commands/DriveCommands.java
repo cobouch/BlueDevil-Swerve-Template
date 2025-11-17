@@ -18,90 +18,98 @@ package org.salemrobotics.frc.commands;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import lombok.val;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.littletonrobotics.junction.Logger;
 import org.salemrobotics.frc.subsystems.drive.SwerveDrive;
 
 public final class DriveCommands {
   public static final double DEADBAND = 0.1;
-  private static final double DRIVE_KP = 2;
-  private static final double DRIVE_KD = 0;
-  private static final double ANGLE_KP = 2;
-  private static final double ANGLE_KD = 0;
-  private static final double ANGLE_TOLERANCE = Units.degreesToRadians(2.5);
-  private static final double POSITION_TOLERANCE = 0.0125;
-  private static final double FF_START_DELAY = 2.0; // Secs
-  private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
-  private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
-  private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
   private static final TrapezoidProfile.Constraints ANGLE_CONSTRAINTS =
       new TrapezoidProfile.Constraints(8, 20);
   private static final TrapezoidProfile.Constraints DRIVE_CONSTRAINTS =
       new TrapezoidProfile.Constraints(4.73, 5);
 
+  @Contract(pure = true)
   private DriveCommands() {}
 
   public static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
-    double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
-    Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
+    double magnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
+    Rotation2d direction = new Rotation2d(Math.atan2(y, x));
 
-    // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    // Square magnitude for finer control
+    magnitude *= magnitude;
 
-    // Return new linear velocity
-    return new Pose2d(new Translation2d(), linearDirection)
-        .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
-        .getTranslation();
+    return new Translation2d(magnitude, 0).rotateBy(direction);
   }
 
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
-  public static Command joystickDrive(
-      SwerveDrive drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier) {
-    return Commands.run(
+  @Contract("_, _, _, _ -> new")
+  public static @NotNull Command joystickDrive(
+          @NotNull SwerveDrive drive,
+          DoubleSupplier xSupplier,
+          DoubleSupplier ySupplier,
+          DoubleSupplier omegaSupplier) {
+    return drive.run(
         () -> {
           // Get linear velocity
           Translation2d linearVelocity =
-              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble())
+                      .times(drive.getMaxLinearSpeed().in(MetersPerSecond));
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
           // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
+          omega *= Math.abs(omega);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
               new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeed().in(MetersPerSecond),
-                  linearVelocity.getY() * drive.getMaxLinearSpeed().in(MetersPerSecond),
+                      linearVelocity.getX(),
+                      linearVelocity.getY(),
                   omega * drive.getMaxAngularSpeed().in(RadiansPerSecond));
-          boolean isFlipped =
-              DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Red;
-          drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
-        },
-        drive);
+
+          drive.runAllianceCentric(speeds);
+        });
+  }
+
+  private static Pose2d autoStartingPose = Pose2d.kZero;
+  private static Command driveToAuto = null;
+
+  public static Command driveToAutoStart(@NotNull SwerveDrive drive, Supplier<Command> autoSupplier) {
+      return drive.defer(() -> {
+        val cmd = autoSupplier.get();
+        if (cmd instanceof PathPlannerAuto auto) {
+            autoStartingPose = auto.getStartingPose();
+
+            Logger.recordOutput("AutoAlign/DriveToPose/AutoName", auto.getName());
+
+            if (driveToAuto == null) {
+                driveToAuto = new DriveToPoseCommand(drive, "DriveToAuto", () -> autoStartingPose);
+            }
+
+            return driveToAuto;
+        }
+
+        // No auto to drive to
+        return Commands.none();
+      });
   }
 }
