@@ -27,7 +27,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.traits.CommonTalon;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
@@ -92,7 +92,7 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
      * @param encoderSource The source of the encoder. This is used to differentiate the different types of CANdi inputs, such as PWM1, PWM2 and Quadrature. This does not configure the steer motor to use the provided encoder as a feedback source.
      */
   protected ModuleIOTalonBase(
-          boolean addToAKThread, @NotNull M driveMotor, @NotNull M steerMotor, @NotNull E encoder, @NotNull FeedbackSensorSourceValue encoderSource) {
+          boolean addToAKThread, @NotNull M driveMotor, @NotNull M steerMotor, @NotNull E encoder, @NotNull SwerveModuleConstants.SteerFeedbackType encoderSource) {
     driveTalon = driveMotor;
     steerTalon = steerMotor;
     this.encoder = encoder;
@@ -111,10 +111,6 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
     steerTorqueCurrent = steerTalon.getTorqueCurrent();
 
       switch (encoderSource) {
-          case RotorSensor:
-              steerAbsolutePosition = steerMotor.getPosition();
-              steerAbsoluteVelocity = steerMotor.getVelocity();
-              break;
           case RemoteCANcoder:
           case FusedCANcoder:
           case SyncCANcoder:
@@ -141,15 +137,6 @@ public abstract class ModuleIOTalonBase<M extends CommonTalon, E extends ParentD
               if (encoder instanceof CANdi candi) {
                   steerAbsolutePosition = candi.getPWM2Position();
                   steerAbsoluteVelocity = candi.getPWM2Velocity();
-              } else {
-                  throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANdi, found " + encoder.getClass().getSimpleName());
-              }
-              break;
-          case RemoteCANdiQuadrature:
-          case FusedCANdiQuadrature:
-              if (encoder instanceof CANdi candi) {
-                  steerAbsolutePosition = candi.getQuadraturePosition();
-                  steerAbsoluteVelocity = candi.getQuadratureVelocity();
               } else {
                   throw new RuntimeException("Encoder feedback source does not match hardware object: Expected CANdi, found " + encoder.getClass().getSimpleName());
               }

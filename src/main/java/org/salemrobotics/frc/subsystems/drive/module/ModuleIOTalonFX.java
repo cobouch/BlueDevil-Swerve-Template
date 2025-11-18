@@ -63,7 +63,7 @@ public class ModuleIOTalonFX extends ModuleIOTalonBase<TalonFX, CANcoder> {
       @NotNull TalonFX driveMotor,
       @NotNull TalonFX steerMotor,
       @NotNull CANcoder encoder) {
-    super(false, driveMotor, steerMotor, encoder);
+    super(false, driveMotor, steerMotor, encoder, TunerConstants.FrontLeft.FeedbackSource);
 
     this.driveOutputType = driveOutputType;
     this.steerOutputType = steerOutputType;
