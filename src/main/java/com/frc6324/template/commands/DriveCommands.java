@@ -16,31 +16,27 @@
 package com.frc6324.template.commands;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.frc6324.template.subsystems.drive.SwerveDrive;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import lombok.val;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.Logger;
 
 public final class DriveCommands {
   public static final double DEADBAND = 0.1;
-  private static final TrapezoidProfile.Constraints ANGLE_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(8, 20);
-  private static final TrapezoidProfile.Constraints DRIVE_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(4.73, 5);
+  private static final FieldCentric joystickDriveRequest =
+      new FieldCentric()
+          .withDriveRequestType(DriveRequestType.Velocity)
+          .withSteerRequestType(SteerRequestType.Position)
+          .withDesaturateWheelSpeeds(true);
 
   @Contract(pure = true)
   private DriveCommands() {}
@@ -61,7 +57,7 @@ public final class DriveCommands {
    */
   @Contract("_, _, _, _ -> new")
   public static @NotNull Command joystickDrive(
-      @NotNull SwerveDrive drive,
+      SwerveDrive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
@@ -71,46 +67,20 @@ public final class DriveCommands {
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble())
                   .times(drive.getMaxLinearSpeed().in(MetersPerSecond));
+          Logger.recordOutput("Drive/JoystickDrive/TranslationVector", linearVelocity);
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
           // Square rotation value for more precise control
           omega *= Math.abs(omega);
+          Logger.recordOutput("Drive/JoystickDrive/RotationalRate", omega);
 
-          // Convert to field relative speeds & send command
-          ChassisSpeeds speeds =
-              new ChassisSpeeds(
-                  linearVelocity.getX(),
-                  linearVelocity.getY(),
-                  omega * drive.getMaxAngularSpeed().in(RadiansPerSecond));
-
-          drive.runAllianceCentric(speeds);
-        });
-  }
-
-  private static Pose2d autoStartingPose = Pose2d.kZero;
-  private static Command driveToAuto = null;
-
-  public static Command driveToAutoStart(
-      @NotNull SwerveDrive drive, Supplier<Command> autoSupplier) {
-    return drive.defer(
-        () -> {
-          val cmd = autoSupplier.get();
-          if (cmd instanceof PathPlannerAuto auto) {
-            autoStartingPose = auto.getStartingPose();
-
-            Logger.recordOutput("AutoAlign/DriveToPose/AutoName", auto.getName());
-
-            if (driveToAuto == null) {
-              driveToAuto = new DriveToPoseCommand(drive, "DriveToAuto", () -> autoStartingPose);
-            }
-
-            return driveToAuto;
-          }
-
-          // No auto to drive to
-          return Commands.none();
+          drive.setControl(
+              joystickDriveRequest
+                  .withVelocityX(linearVelocity.getX())
+                  .withVelocityY(linearVelocity.getY())
+                  .withRotationalRate(omega));
         });
   }
 }

@@ -11,7 +11,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "com.frc6324.template.Main"
+def ROBOT_MAIN_CLASS = "com.frc6324.template.Robot"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -31,9 +31,11 @@ deploy {
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
                     jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
-                    jvmArgs.add("-XX:GCTimeRatio=5")
+                    jvmArgs.add("-XX:GCTimeRatio=9")
                     jvmArgs.add("-XX:+UseSerialGC")
                     jvmArgs.add("-XX:MaxGCPauseMillis=50")
+                    jvmArgs.add("-XX:+TieredCompilation")
+                    jvmArgs.add("-XX:+UseStringDeduplication")
 
                     // The options below may improve performance, but should only be enabled on the RIO 2
                     //
@@ -41,6 +43,7 @@ deploy {
                     jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
                     jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
                     jvmArgs.add("-XX:+AlwaysPreTouch")
+                    jvmArgs.add("-XX:+UseLargePages")
                 }
 
                 // Static files artifact

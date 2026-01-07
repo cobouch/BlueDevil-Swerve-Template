@@ -15,13 +15,14 @@
  */
 package com.frc6324.template;
 
-import com.frc6324.template.util.Elastic;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import lombok.val;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -36,9 +37,13 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public final class Robot extends LoggedRobot {
-  @Nullable private Command autonomousCommand = null;
+  @NotNull private Command autonomousCommand = Commands.none();
   private final RobotContainer robotContainer;
   private final Runtime rt = Runtime.getRuntime();
+
+  public static void main(String... args) {
+    RobotBase.startRobot(Robot::new);
+  }
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -139,8 +144,6 @@ public final class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }
-
-    Elastic.selectTab("Autonomous");
   }
 
   @Override
@@ -159,17 +162,13 @@ public final class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-
-    Elastic.selectTab("Teleoperated");
   }
 
   @Override
   public void teleopPeriodic() {}
 
   @Override
-  public void teleopExit() {
-    Elastic.selectTab("Autonomous");
-  }
+  public void teleopExit() {}
 
   /** This function is called once when test mode is enabled. */
   @Override
@@ -189,7 +188,5 @@ public final class Robot extends LoggedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {
-    robotContainer.simulationPeriodic();
-  }
+  public void simulationPeriodic() {}
 }
