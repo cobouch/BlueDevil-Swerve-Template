@@ -2,11 +2,13 @@ package com.frc6324.template.subsystems.drive;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public final class SwerveWidget implements Sendable {
   private final SwerveDrive drive;
+
+  public SwerveWidget(SwerveDrive drive) {
+    this.drive = drive;
+  }
 
   @Override
   public void initSendable(SendableBuilder builder) {

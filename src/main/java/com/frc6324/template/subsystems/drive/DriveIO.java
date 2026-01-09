@@ -1,17 +1,17 @@
 package com.frc6324.template.subsystems.drive;
 
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.frc6324.template.subsystems.drive.DriveIO.DriveIOReplay;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -22,13 +22,11 @@ import org.littletonrobotics.junction.AutoLog;
  * An I/O layer over the robot's drivetrain. Defines I/O operations and methods to control the
  * drivetrain.
  */
-public sealed interface DriveIO permits DriveIOCTRE, DriveIOReplay {
+public interface DriveIO {
   /** Inputs for the drivetrain. */
   @AutoLog
   public class DriveInputs extends SwerveDriveState {
-    /**
-     * The angle of the robot as reported by the gyroscope.
-     */
+    /** The angle of the robot as reported by the gyroscope. */
     public Rotation2d GyroAngle = Rotation2d.kZero;
 
     public double VelocityTimestamp = 0;
@@ -102,26 +100,11 @@ public sealed interface DriveIO permits DriveIOCTRE, DriveIOReplay {
    *
    * @param pose The measured pose.
    * @param timestamp The timestamp at which the measurement was taken by the camera.
+   * @param stddevs The standard deviations of the measurement.
    */
-  void addVisionMeasurement(Pose2d pose, double timestamp);
+  void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stddevs);
 
-  /**
-   * Sets the 2D standard deviation values of the pose estimator.
-   *
-   * @param stdX The standard deviation of X measurements.
-   * @param stdY The standard deviation of Y measurements.
-   * @param stdTheta The standard deviation of angle measurements.
-   * @implNote According to WPILib specifications, the axes are defined as:
-   *     <ul>
-   *       <li>X: Towards and away from the driver station's perspective
-   *       <li>Y: Left and right from the driver station's perspective
-   *     </ul>
-   */
-  void setVisionStdDevs(double stdX, double stdY, double stdTheta);
-
-  /**
-   * An empty implementation of I/O procedures for the drivetrain during replay.
-   */
+  /** An empty implementation of I/O procedures for the drivetrain during replay. */
   public static final class DriveIOReplay implements DriveIO {
     @Override
     public void updateInputs(DriveInputs inputs) {}
@@ -136,9 +119,6 @@ public sealed interface DriveIO permits DriveIOCTRE, DriveIOReplay {
     public void setControl(SwerveRequest request) {}
 
     @Override
-    public void addVisionMeasurement(Pose2d pose, double timestamp) {}
-
-    @Override
-    public void setVisionStdDevs(double stdX, double stdY, double stdTheta) {}
+    public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stddevs) {}
   }
 }

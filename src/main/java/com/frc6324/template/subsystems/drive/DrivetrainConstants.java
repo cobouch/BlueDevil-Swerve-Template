@@ -1,12 +1,15 @@
 package com.frc6324.template.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.*;
 
 import com.frc6324.template.generated.TunerConstants;
+import com.frc6324.template.util.Statics;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,13 +23,13 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
 public final class DrivetrainConstants {
   public static final double ODOMETRY_UPDATE_FREQUENCY = 250;
+  public static final int SIMULATION_TICKS_PER_LOOP = (int) (ODOMETRY_UPDATE_FREQUENCY / 50);
+
   public static final Vector<N3> ODOMETRY_STDDEVS =
       VecBuilder.fill(0.02, 0.02, Units.degreesToRadians(2.5));
   public static final Vector<N3> DEFAULT_VISION_STDDEVS =
       VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  public static final String[] MODULE_NAMES = {
-    "Front Left", "Front Right", "Back Left", "Back Right"
-  };
+  public static final String[] MODULE_NAMES = {"FrontLeft", "FrontRight", "BackLeft", "BackRight"};
 
   public static final Translation2d[] MODULE_TRANSLATIONS = {
     new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
@@ -37,7 +40,7 @@ public final class DrivetrainConstants {
 
   public static final Mass ROBOT_MASS = Pounds.of(140);
   public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(6);
-  public static final double WHEEL_COF = 1.2;
+  public static final double WHEEL_COF = 1.43;
 
   public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG =
       DriveTrainSimulationConfig.Default()
@@ -58,4 +61,29 @@ public final class DrivetrainConstants {
           Math.max(
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+
+  public static final RobotConfig PP_CONFIG =
+      Statics.initOrDefault(
+          RobotConfig::fromGUISettings,
+          () ->
+              new RobotConfig(
+                  ROBOT_MASS,
+                  ROBOT_MOI,
+                  new ModuleConfig(
+                      Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                      TunerConstants.kSpeedAt12Volts,
+                      WHEEL_COF,
+                      DCMotor.getKrakenX60Foc(1),
+                      Amps.of(TunerConstants.FrontLeft.SlipCurrent),
+                      1),
+                  MODULE_TRANSLATIONS));
+
+  public static final PIDController BLINE_TRANSLATION_CONTROLLER =
+      new PIDController(SIMULATION_TICKS_PER_LOOP, ODOMETRY_UPDATE_FREQUENCY, DRIVE_BASE_RADIUS);
+  public static final PIDController BLINE_ROTATION_CONTROLLER =
+      new PIDController(SIMULATION_TICKS_PER_LOOP, ODOMETRY_UPDATE_FREQUENCY, DRIVE_BASE_RADIUS);
+  public static final PIDController BLINE_CTE_CONTROLLER =
+      new PIDController(SIMULATION_TICKS_PER_LOOP, ODOMETRY_UPDATE_FREQUENCY, DRIVE_BASE_RADIUS);
+  public static final PIDConstants PATHPLANNER_TRANSLATION_CONSTANTS = new PIDConstants(5, 0, 0);
+  public static final PIDConstants PATHPLANNER_ROTATION_CONSTANTS = new PIDConstants(6, 0, 0);
 }

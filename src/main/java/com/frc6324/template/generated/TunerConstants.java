@@ -63,6 +63,8 @@ public final class TunerConstants {
   private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();
   private static final TalonFXConfiguration steerInitialConfigs =
       new TalonFXConfiguration()
+          .withMotionMagic(
+              new MotionMagicConfigs().withMotionMagicExpo_kV(0.4).withMotionMagicExpo_kA(0.8))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   // Swerve azimuth does not require much torque output, so we can set a relatively

@@ -30,15 +30,24 @@ deploy {
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                    jvmArgs.add("-server")
+                    // Enable Tiered Compilation (Default in JVM 17, but good to be explicit)
+                    jvmArgs.add("-XX:+TieredCompilation")
+
+                    // Optional: Custom thresholds (lower values compile to higher tiers faster)
+                    jvmArgs.add("-XX:Tier3InvocationThreshold=100")
+                    jvmArgs.add("-XX:Tier4InvocationThreshold=2500")
+
                     jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
                     jvmArgs.add("-XX:GCTimeRatio=9")
                     jvmArgs.add("-XX:+UseSerialGC")
                     jvmArgs.add("-XX:MaxGCPauseMillis=50")
                     jvmArgs.add("-XX:+TieredCompilation")
                     jvmArgs.add("-XX:+UseStringDeduplication")
+                    jvmArgs.add("-XX:+UseCompressedOops")
+                    jvmArgs.add("-XX:CICompilerCount=2")
 
                     // The options below may improve performance, but should only be enabled on the RIO 2
-                    //
                     final MAX_JAVA_HEAP_SIZE_MB = 100;
                     jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
                     jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")

@@ -16,7 +16,6 @@
 package com.frc6324.template;
 
 import com.frc6324.template.commands.DriveCommands;
-import com.frc6324.template.generated.TunerConstants;
 import com.frc6324.template.subsystems.drive.DriveIO.DriveIOReplay;
 import com.frc6324.template.subsystems.drive.DriveIOCTRE;
 import com.frc6324.template.subsystems.drive.DriveIOSim;
@@ -39,15 +38,10 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL -> {
-        drive =
-            new SwerveDrive(
-                new DriveIOCTRE(TunerConstants.DrivetrainConstants, SwerveDrive.MODULE_CONSTANTS));
+        drive = new SwerveDrive(new DriveIOCTRE());
       }
       case SIM -> {
-        var moduleConstants =
-            SwerveDrive.regulateModuleConstantsForSimulation(SwerveDrive.MODULE_CONSTANTS);
-        drive =
-            new SwerveDrive(new DriveIOSim(TunerConstants.DrivetrainConstants, moduleConstants));
+        drive = new SwerveDrive(new DriveIOSim());
       }
       default -> {
         drive = new SwerveDrive(new DriveIOReplay());
