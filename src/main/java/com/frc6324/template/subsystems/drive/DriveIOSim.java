@@ -1,5 +1,6 @@
 package com.frc6324.template.subsystems.drive;
 
+import static com.frc6324.template.subsystems.drive.DrivetrainConstants.ODOMETRY_PERIOD;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.frc6324.template.generated.TunerConstants;
@@ -8,12 +9,9 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 
 public final class DriveIOSim extends DriveIOCTRE {
-  private static final double SIM_LOOP_PERIOD = 0.004;
-
   @SuppressWarnings("unchecked")
   private final MapleSimDriveBase simulation =
       new MapleSimDriveBase(
-          Seconds.of(SIM_LOOP_PERIOD),
           getPigeon2(),
           getModules(),
           TunerConstants.FrontLeft,
@@ -28,8 +26,10 @@ public final class DriveIOSim extends DriveIOCTRE {
 
     registerTelemetry(state -> state.Pose = simulation.getSimulatedDriveTrainPose());
 
+    Notifier.setHALThreadPriority(true, 90);
+
     notifier.setName("Simulation Thread");
-    notifier.startPeriodic(SIM_LOOP_PERIOD);
+    notifier.startPeriodic(ODOMETRY_PERIOD.in(Seconds));
   }
 
   @Override

@@ -12,7 +12,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.frc6324.template.generated.TunerConstants;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -40,12 +39,10 @@ public class DriveIOCTRE extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> im
         ODOMETRY_STDDEVS,
         DEFAULT_VISION_STDDEVS,
         SwerveDrive.regulateModuleConstantsForSimulation(
-            new SwerveModuleConstants[] {
-              TunerConstants.FrontLeft,
-              TunerConstants.FrontRight,
-              TunerConstants.BackLeft,
-              TunerConstants.BackRight
-            }));
+            TunerConstants.FrontLeft,
+            TunerConstants.FrontRight,
+            TunerConstants.BackLeft,
+            TunerConstants.BackRight));
 
     // Reset the pose in simulation to prevent CTRE/maple-sim conflict(s)
     if (RobotBase.isSimulation()) {

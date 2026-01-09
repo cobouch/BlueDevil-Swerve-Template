@@ -1,6 +1,7 @@
 package com.frc6324.template.subsystems.drive;
 
 import static com.frc6324.template.subsystems.drive.DrivetrainConstants.MAPLE_SIM_CONFIG;
+import static com.frc6324.template.subsystems.drive.DrivetrainConstants.ODOMETRY_PERIOD;
 import static com.frc6324.template.subsystems.drive.DrivetrainConstants.STARTING_POSE;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -16,7 +17,6 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -28,8 +28,8 @@ public final class MapleSimDriveBase extends SwerveDriveSimulation {
   private final Pigeon2SimState pigeonSim;
   private final SimSwerveModule[] simModules;
 
+  @SuppressWarnings("unchecked")
   public MapleSimDriveBase(
-      Time simPeriod,
       Pigeon2 pigeon,
       SwerveModule<TalonFX, TalonFX, CANcoder>[] modules,
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>...
@@ -43,7 +43,7 @@ public final class MapleSimDriveBase extends SwerveDriveSimulation {
       simModules[i] = new SimSwerveModule(moduleConstants[0], moduleSimulations[i], modules[i]);
     }
 
-    SimulatedArena.overrideSimulationTimings(simPeriod, 1);
+    SimulatedArena.overrideSimulationTimings(ODOMETRY_PERIOD, 1);
     SimulatedArena.getInstance().addDriveTrainSimulation(this);
   }
 

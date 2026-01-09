@@ -5,11 +5,11 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.SwerveDriveBrake;
@@ -283,7 +283,7 @@ public final class SwerveDrive extends SubsystemBase {
    * @see #regulateModuleConstantForSimulation(SwerveModuleConstants)
    */
   public static SwerveModuleConstants<?, ?, ?>[] regulateModuleConstantsForSimulation(
-      SwerveModuleConstants<?, ?, ?>[] moduleConstants) {
+      SwerveModuleConstants<?, ?, ?>... moduleConstants) {
     // Regulate each module's constants
     for (SwerveModuleConstants<?, ?, ?> moduleConstant : moduleConstants) {
       regulateModuleConstantForSimulation(moduleConstant);
@@ -328,18 +328,21 @@ public final class SwerveDrive extends SubsystemBase {
     moduleConstants.DriveMotorInverted = false;
     moduleConstants.SteerMotorInverted = false;
 
-    // Alter motor PID gains
+    // Use Voltage output during sim since Torque Current doesn't play nice
+    moduleConstants.SteerMotorClosedLoopOutput = ClosedLoopOutputType.Voltage;
+    moduleConstants.SteerMotorClosedLoopOutput = ClosedLoopOutputType.Voltage;
+
+    // Alter motor PID gains for both sim and voltage
     moduleConstants.DriveMotorGains.kP = 5;
     moduleConstants.DriveMotorGains.kD = 0;
     moduleConstants.DriveMotorGains.kS = 0;
-    moduleConstants.DriveMotorGains.StaticFeedforwardSign =
-        StaticFeedforwardSignValue.UseClosedLoopSign;
 
-    moduleConstants.SteerMotorGains.kP = 20;
-    moduleConstants.SteerMotorGains.kD = 6.5;
-    moduleConstants.SteerMotorGains.kS = 0;
+    moduleConstants.SteerMotorGains.kP = 80;
+    moduleConstants.SteerMotorGains.kD = 8;
+    moduleConstants.SteerMotorGains.kS = 0.6;
+    moduleConstants.SteerMotorGains.kV = 0;
 
-    // Adjust friction voltages for maple-sim
+    // Adjust friction voltages for sim
     moduleConstants.DriveFrictionVoltage = 0.1;
     moduleConstants.SteerFrictionVoltage = 0.15;
 

@@ -18,12 +18,14 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Time;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
 public final class DrivetrainConstants {
   public static final double ODOMETRY_UPDATE_FREQUENCY = 250;
   public static final int SIMULATION_TICKS_PER_LOOP = (int) (ODOMETRY_UPDATE_FREQUENCY / 50);
+  public static final Time ODOMETRY_PERIOD = Hertz.of(ODOMETRY_UPDATE_FREQUENCY).asPeriod();
 
   public static final Vector<N3> ODOMETRY_STDDEVS =
       VecBuilder.fill(0.02, 0.02, Units.degreesToRadians(2.5));
