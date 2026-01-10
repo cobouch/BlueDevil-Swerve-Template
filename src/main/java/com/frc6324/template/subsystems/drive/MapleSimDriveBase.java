@@ -45,6 +45,7 @@ public final class MapleSimDriveBase extends SwerveDriveSimulation {
 
     SimulatedArena.overrideSimulationTimings(ODOMETRY_PERIOD, 1);
     SimulatedArena.getInstance().addDriveTrainSimulation(this);
+    SimulatedArena.getInstance().resetFieldForAuto();
   }
 
   public void update() {

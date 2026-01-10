@@ -138,6 +138,8 @@ $RECYCLE.BIN/
 ### Gradle ###
 .gradle
 /build/
+/annotations/build/
+/processor/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -186,4 +188,5 @@ compile_commands.json
 # Version file
 **/BuildConstants.java
 src/main/java/org/salemrobotics/frc/BuildConstants.java
+src/main/java/com/frc6324/template/BuildConstants.java
 src/main/java/com/frc6324/template/BuildConstants.java

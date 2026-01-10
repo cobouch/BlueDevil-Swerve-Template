@@ -16,6 +16,7 @@
 package com.frc6324.template.commands;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
+import com.frc6324.lib.UninstantiableClass;
 import com.frc6324.template.subsystems.drive.SwerveDrive;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +33,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.Logger;
 
+@UninstantiableClass
 public final class DriveCommands {
+  static final double instanceField = 0;
+
   static final double ANGLE_TOLERANCE = 2.5;
   static final double POSITION_TOLERANCE = Units.inchesToMeters(2);
   static final double TRANSLATION_MAX_VELOCITY = SwerveDrive.getMaxLinearSpeed();
@@ -103,7 +107,7 @@ public final class DriveCommands {
         });
   }
 
-  public Command driveToPose(SwerveDrive drive, Supplier<Pose2d> poseSupplier) {
+  public static Command driveToPose(SwerveDrive drive, Supplier<Pose2d> poseSupplier) {
     var builder = drive.getBLineBuilder();
 
     return drive.defer(
@@ -117,7 +121,7 @@ public final class DriveCommands {
         });
   }
 
-  public Command driveToPose(SwerveDrive drive, Pose2d target) {
+  public static Command driveToPose(SwerveDrive drive, Pose2d target) {
     Waypoint targetWaypoint = new Waypoint(target, true);
 
     var path = new Path(targetWaypoint);

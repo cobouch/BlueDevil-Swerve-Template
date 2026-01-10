@@ -333,7 +333,7 @@ public final class SwerveDrive extends SubsystemBase {
     moduleConstants.SteerMotorClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
     // Alter motor PID gains for both sim and voltage
-    moduleConstants.DriveMotorGains.kP = 5;
+    moduleConstants.DriveMotorGains.kP = 10;
     moduleConstants.DriveMotorGains.kD = 0;
     moduleConstants.DriveMotorGains.kS = 0;
 
